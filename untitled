@@ -1900,33 +1900,3 @@ local Button = TeleportTab:CreateButton({
       game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
     end,
 })
-
-
--------------------------------------------------------------------------------------
-local isAutoRollEnabled = false -- A shared variable to control the loop
-local Section = ExtraTab:CreateSection("Extra Features")
-local Toggle = ExtraTab:CreateToggle({
-    Name = "Auto Roll Aura",
-    CurrentValue = false,
-    Flag = "Toggle10",
-    Callback = function(Value)
-           isAutoRollEnabled = Value
-
-           if Value then
-               task.spawn(function()
-               while isAutoRollEnabled do
-                   wait(0.001)
-                   game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("AuraService"):WaitForChild("RF"):WaitForChild("Roll"):InvokeServer()
-                end
-             end)
-          end
-       end,
-})
-
-local Button = ExtraTab:CreateButton({
-    Name = "Anti AFK",
-    Callback = function()
-      loadstring(game:HttpGet("https://raw.githubusercontent.com/batusz/main/roblox/__Anti__Afk__Script__", true))()
-  end,
-})
-
