@@ -1,0 +1,1944 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+local Window = Rayfield:CreateWindow({
+   Name = "AWS By (bkmd_ytt)",
+   LoadingTitle = "Arm Wrestle Simulator",
+   LoadingSubtitle = "by bkmd_ytt",
+   ConfigurationSaving = {
+      Enabled = false,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "hello"
+   },
+   Discord = {
+      Enabled = true,
+      Invite = "3rQsKNhP4J", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+   KeySystem = true, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Keysystem - AWS",
+      Subtitle = "Everything you need to be best (:",
+      Note = "Dm me if u got sugg/issues, Discord: (bkmd_ytt)",
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"BKOnTop!"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local PrisonEventTab = Window:CreateTab("Prison Event", "calendar-clock") -- Title, Image
+local EventTab = Window:CreateTab("Christmas Event", "calendar-clock") -- Title, Image
+local TrainTab = Window:CreateTab("Training", "accessibility") -- Title, Image
+local NpcTab = Window:CreateTab("Bosses/NPCs", "user") -- Title, Image
+local EggTab = Window:CreateTab("Eggs", "egg")
+local TeleportTab = Window:CreateTab("Teleport", "map") -- Title, Image
+local ExtraTab = Window:CreateTab("Extra", "package-plus") -- Title, Image
+local SoonTab = Window:CreateTab("More Coming Soon... (:")
+-- Tabs
+
+
+-------------------------------------------------------------------------------------
+local Section = PrisonEventTab:CreateSection("Teleport Prison Event")
+local Button = PrisonEventTab:CreateButton({
+    Name = "Teleport To Event Part (1)",
+    Callback = function()
+        local args = {
+            [1] = workspace:WaitForChild("Zones"):WaitForChild("PrisonEvent"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+        }
+
+        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+  end
+})
+
+local Divider = PrisonEventTab:CreateDivider()
+
+local Button = PrisonEventTab:CreateButton({
+    Name = "Teleport To Underground",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+
+        local targetCFrame = CFrame.new(-9365.2197265625, -5.243128299713135, 3941.91259765625)
+
+            character:SetPrimaryPartCFrame(targetCFrame)
+        end
+})
+
+local Section = PrisonEventTab:CreateSection("Auto Beat Underground NPCs OP (Part 1)")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Ensure the NPCs and HumanoidRootPart exist
+local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+if not humanoidRootPart then return end
+
+-- Function to check if the NPC has Spawned or not
+local function isPrisonNpcValid(npc)
+    local success, result = pcall(function()
+        return npc and npc:FindFirstChild("Table") and npc.Table:FindFirstChild("PlayerRoot")
+    end)
+    return success and result
+end
+
+-- Function to get all Spawned NPCs
+local function getPrisonValidNpcs()
+    local validPrisonNpcPaths = {}
+    local npcPrisonFolder = workspace.GameObjects.RngNPCs["PrisonEvent-Underground"].Npc
+
+    for _, npc in ipairs(npcPrisonFolder:GetChildren()) do
+        if isPrisonNpcValid(npc) then
+            table.insert(validPrisonNpcPaths, npc.Table.PlayerRoot)
+        end
+    end
+
+    return validPrisonNpcPaths
+end
+
+-- Function to simulate pressing a key
+local function simulateKeyPress(key)
+    VirtualInputManager:SendKeyEvent(true, key, false, game)
+    wait(0.1) -- Short delay to simulate a key press
+    VirtualInputManager:SendKeyEvent(false, key, false, game)
+end
+
+-- Function to click the "E" key
+local function clickE()
+    simulateKeyPress(Enum.KeyCode.E) -- Simulate a single press of "E"
+end
+
+local teleportPrisonEnabled = false
+
+local function teleportPrisonToPlayerRoot()
+    while teleportPrisonEnabled do
+        local validPrisonNpcPaths = getPrisonValidNpcs()
+
+        if #validPrisonNpcPaths == 0 then break end
+
+        for _, playerRoot in ipairs(validPrisonNpcPaths) do
+            if playerRoot then
+                humanoidRootPart.CFrame = playerRoot.CFrame -- Teleport to the PlayerRoot
+                wait(0.5) -- Wait 0.5 seconds before clicking "E"
+                clickE() -- Click "E" once
+                wait(2.8) -- Wait 2.8 seconds before teleporting to the next NPC
+            end
+
+            if not teleportPrisonEnabled then break end
+        end
+    end
+end
+
+local Toggle = PrisonEventTab:CreateToggle({
+   Name = "Auto Fight Underground NPCs (Part 1)",
+   CurrentValue = false,
+   Flag = "PrisonEventToggle2",
+   Callback = function(Value)
+      teleportPrisonEnabled = Value
+      if teleportPrisonEnabled then
+         teleportPrisonToPlayerRoot()
+             Rayfield:Notify({
+            Title = "Read !",
+            Content = "Make sure you are in a server that have inf snowstorm event , bc when the snowstorm event end, it Will broke..",
+            Duration = 5,  -- Notification will last for 5 seconds
+            Image = 4483362458,  -- Optional image ID for the notification
+         })    
+      end
+   end,
+})
+
+local npcPrisonPromptsFolder = workspace.GameObjects.RngNPCs["PrisonEvent-Underground"].Npc
+local updatePrisonEnabled = false
+
+local function updatePrisonProximityPrompts(folder)
+    for _, descendant in ipairs(folder:GetDescendants()) do
+        if descendant:IsA("ProximityPrompt") then
+            descendant.HoldDuration = 0
+            descendant.Style = Enum.ProximityPromptStyle.Default
+        end
+    end
+end
+
+local function startPrisonUpdatingPrompts()
+    while updatePrisonEnabled do
+        updatePrisonProximityPrompts(npcPrisonPromptsFolder)
+        wait(2.5) -- Adjust the interval as needed
+    end
+end
+
+local Toggle = PrisonEventTab:CreateToggle({
+   Name = "Remove E Hold Button (Must Be ON)",
+   CurrentValue = false,
+   Flag = "PromptToggle2",
+   Callback = function(Value)
+      updatePrisonEnabled = Value
+      if updatePrisonEnabled then
+         startPrisonUpdatingPrompts()
+      end
+   end,
+})
+
+local Divider = PrisonEventTab:CreateDivider()
+local Paragraph = PrisonEventTab:CreateParagraph({Title = "READ!", Content = "Make sure you are in a server that have ( inf Snowstorm Event ) , bc when the Snowstorm Event end, it Will broke.."})
+
+local Section = PrisonEventTab:CreateSection("Glitch (Train + Fight as The Same Time!) (Part 1)")
+local isGlitchLooping = false  -- Flag to control the loop
+local currentGlitchNumber = 1  -- Default Frostland number
+
+-- Dropdown to enter a number for Frostland
+local Dropdown = PrisonEventTab:CreateDropdown({
+    Name = "Choose Your Biceps Weight (Part 1) For The Glitch!",
+    Options = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"},
+    CurrentOption = {"1"},
+    MultipleOptions = false,
+    Flag = "GlitchTrainDropdown",
+    Callback = function(Options)
+        local number = tonumber(Options[1])  -- Get the selected number from the dropdown
+        if number and number >= 1 and number <= 12 then
+            currentGlitchNumber = number  -- Update the Frostland number based on the dropdown selection
+        end
+    end,
+})
+
+-- Toggle to start/stop the loop
+local Toggle = PrisonEventTab:CreateToggle({
+    Name = "Start Auto Train Glitch (You Can fight NPCs While You Training!)",
+    CurrentValue = false,
+    Flag = "GlitchTrainToggle",
+    Callback = function(Value)
+        isGlitchLooping = Value  -- Set the loop flag based on the toggle state
+        if Value then
+            task.spawn(function()
+                while isGlitchLooping do
+                    wait()
+                    local args = {
+                        [1] = {
+                            ["Value"] = "Biceps",
+                            ["AutoType"] = "AutoTrain"
+                        }
+                    }
+
+                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("IdleTeleportService"):WaitForChild("RF"):WaitForChild("SetLatestTeleportData"):InvokeServer(unpack(args))
+
+                    local args = {
+                        [1] = "PrisonEvent",
+                        [2] = "Dumbells",
+                        [3] = "Prison" .. currentGlitchNumber  -- Use the current input value
+                    }
+
+                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ToolService"):WaitForChild("RE"):WaitForChild("onEquipRequest"):FireServer(unpack(args))
+
+                    local args = {
+                        [1] = "AutoTraining",
+                        [2] = {
+                            ["TrainingType"] = "Biceps"
+                        }
+                    }
+
+                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("AutoService"):WaitForChild("RF"):WaitForChild("SetRejoin"):InvokeServer(unpack(args))
+                end
+            end)
+        end
+    end,
+})
+
+local isAutoGlitchTrainEnabled = false -- A shared variable to control the loop
+local Toggle = PrisonEventTab:CreateToggle({
+   Name = "Auto Click Train Glitch",
+   CurrentValue = false,
+   Flag = "GlitchTrain1Toggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+          isAutoGlitchTrainEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isAutoGlitchTrainEnabled do
+                wait()
+                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ToolService"):WaitForChild("RE"):WaitForChild("onClick"):FireServer()
+            end
+         end)
+      end
+   end,
+})
+
+local Divider = PrisonEventTab:CreateDivider()
+local Paragraph = PrisonEventTab:CreateParagraph({Title = "Read it", Content = "Now You Can Train + Fight The NPCs That In Underground, Its So OP (: , I Mean That In: (Auto Fight Underground NPCs (Part 1)"})
+
+local Section = PrisonEventTab:CreateSection("Auto Fight Bosses")
+local selectedPrisonOption = nil -- To store the selected dropdown option
+local togglePrisonEnabled = false -- To track the toggle state
+
+-- List of NPCs for Prison Event
+local PrisonNPCs = {
+    -- Part 1 NPCs
+    "OfficerKane", "BanditJay", "AgentDave", "InmateRex", "PrisonSwat", "InmateMutant"
+}
+
+local function getWorldPrison(bossPrisonName)
+    if table.find({"OfficerKane", "BanditJay", "AgentDave", "InmateRex", "PrisonSwat", "InmateMutant"}, bossPrisonName) then
+        return "PrisonEvent"
+    end
+    return nil
+end
+
+local Dropdown = PrisonEventTab:CreateDropdown({
+   Name = "Select Boss, Part (1)",
+   Options = PrisonNPCs, -- Default options list
+   CurrentOption = {}, -- Default selected option
+   MultipleOptions = false, -- Allow only one option to be selected
+   Flag = "PrisonDropdown2",
+   Callback = function(Options)
+       selectedPrisonOption = Options[1] -- Save the selected option
+   end,
+})
+
+local Toggle = PrisonEventTab:CreateToggle({
+   Name = "Auto Fight Boss",
+   CurrentValue = false,
+   Flag = "PrisonEventToggle3",
+   Callback = function(Value)
+       togglePrisonEnabled = Value 
+       if togglePrisonEnabled then
+           spawn(function() 
+               while togglePrisonEnabled and selectedPrisonOption do
+                   local worldPrison = getWorldPrison(selectedPrisonOption) -- Get the world number based on selected NPC
+                   if worldPrison then
+                       local args = {
+                           [1] = selectedPrisonOption, -- NPC name
+                           [2] = workspace:WaitForChild("GameObjects"):WaitForChild("ArmWrestling"):WaitForChild(worldPrison):WaitForChild("NPC"):WaitForChild(selectedPrisonOption):WaitForChild("Table"), -- NPC path
+                           [3] = worldPrison -- World number
+                       }
+
+                       game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ArmWrestleService"):WaitForChild("RE"):WaitForChild("onEnterNPCTable"):FireServer(unpack(args))
+
+                       wait(0.01)
+                   end
+               end
+           end)
+       end
+   end,
+})
+
+local isAutoPrisonFightEnabled = false -- A shared variable to control the loop
+local Toggle = PrisonEventTab:CreateToggle({
+    Name = "Auto Click Fight",
+    CurrentValue = false,
+    Flag = "PrisonEventToggle5",
+   Callback = function(Value)
+          isAutoPrisonFightEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isAutoPrisonFightEnabled do
+                wait(0.01)
+                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ArmWrestleService"):WaitForChild("RE"):WaitForChild("onClickRequest"):FireServer()
+            end
+         end)
+      end
+   end,
+})
+
+local Section = PrisonEventTab:CreateSection("Event Eggs")
+local args = {
+   [1] = "", -- Egg name (will be set via dropdown)
+   [2] = nil, -- Auto Delete (From Table)
+   [3] = nil, -- Triple Egg (gamepass)
+   [4] = false, -- Auto Egg (gamepass)
+   [5] = nil, -- Octuple Egg (gamepass)
+   [6] = true -- Max egg
+}
+
+local eggPrisonNames = {"Prison", "Police"}
+
+local Dropdown = PrisonEventTab:CreateDropdown({
+   Name = "Select Egg",
+   Options = eggPrisonNames,
+   CurrentOption = {},
+   MultipleOptions = false,
+   Flag = "SelectedEgg",
+   Callback = function(selectedOptions)
+      args[1] = selectedOptions[1] -- Update args[1] with the selected egg name
+   end,
+})
+
+local autoPrisonPurchase = false
+local Toggle = PrisonEventTab:CreateToggle({
+   Name = "Auto Hatch",
+   CurrentValue = false,
+   Flag = "AutoPurchasePrisonToggle",
+   Callback = function(state)
+      autoPrisonPurchase = state -- Enable or disable auto-purchase
+      if autoPrisonPurchase then
+         while autoPrisonPurchase do
+            if args[1] ~= "" then
+               game:GetService("ReplicatedStorage").Packages.Knit.Services.EggService.RF.purchaseEgg:InvokeServer(unpack(args))
+            end
+            task.wait(0.1) -- Adjust delay as needed to prevent spam
+         end
+      end
+   end,
+})
+
+local Divider = PrisonEventTab:CreateDivider()
+local Paragraph = PrisonEventTab:CreateParagraph({Title = "Note !", Content = "Its Hatching Max Egg That You Have"})
+
+local Section = PrisonEventTab:CreateSection("Biceps Train")
+local isLoopingPrison = false  -- Flag to control the loop
+local currentNumberPrison = 1  -- Default Prison number
+
+local Dropdown = PrisonEventTab:CreateDropdown({
+    Name = "Choose Your Biceps Weight, Part (1)",
+    Options = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"},
+    CurrentOption = {"1"},
+    MultipleOptions = false,
+    Flag = "PrisonDropdown1",
+    Callback = function(Options)
+        local number = tonumber(Options[1])  -- Get the selected number from the dropdown
+        if number and number >= 1 and number <= 12 then
+            currentNumberPrison = number  -- Update the Prison number based on the dropdown selection
+        end
+    end,
+})
+
+local Toggle = PrisonEventTab:CreateToggle({
+    Name = "Auto Train",
+    CurrentValue = false,
+    Flag = "PrisonEventToggle1",
+    Callback = function(Value)
+        isLoopingPrison = Value  -- Set the loop flag based on the toggle state
+
+        if Value then
+            local args = {
+                [1] = {
+                    ["Value"] = "Biceps",
+                    ["AutoType"] = "AutoTrain"
+                }
+            }
+
+            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("IdleTeleportService"):WaitForChild("RF"):WaitForChild("SetLatestTeleportData"):InvokeServer(unpack(args))
+
+            local args = {
+                [1] = "PrisonEvent",
+                [2] = "Dumbells",
+                [3] = "Prison" .. currentNumberPrison  -- Use the current input value
+            }
+
+            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ToolService"):WaitForChild("RE"):WaitForChild("onEquipRequest"):FireServer(unpack(args))
+
+            local args = {
+                [1] = "AutoTraining",
+                [2] = {
+                    ["TrainingType"] = "Biceps"
+                }
+            }
+
+            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("AutoService"):WaitForChild("RF"):WaitForChild("SetRejoin"):InvokeServer(unpack(args))
+        end
+    end,
+})
+
+local isAutoPrisonTrainEnabled = false -- A shared variable to control the loop
+local Toggle = PrisonEventTab:CreateToggle({
+   Name = "Auto Click Train",
+   CurrentValue = false,
+   Flag = "Train1Toggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+          isAutoPrisonTrainEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isAutoPrisonTrainEnabled do
+                wait()
+                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ToolService"):WaitForChild("RE"):WaitForChild("onClick"):FireServer()
+            end
+         end)
+      end
+   end,
+})
+
+local function buyPrisonItem(merchantPrisonName, selectedPrisonNumbers)
+    for _, numberPrison in ipairs(selectedPrisonNumbers) do
+        local args = {
+            [1] = merchantPrisonName,
+            [2] = numberPrison
+        }
+
+        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("LimitedMerchantService"):WaitForChild("RF"):WaitForChild("BuyItem"):InvokeServer(unpack(args))
+        wait(0.1)
+    end
+end
+
+local Section = PrisonEventTab:CreateSection("Black Market")
+local selectedPrisonNumbers = {}
+
+local Dropdown = PrisonEventTab:CreateDropdown({
+    Name = "Black Market",
+    Options = { "1", "2", "3", "4", "5" },
+    CurrentOption = {},
+    MultipleOptions = true,
+    Flag = "BlackMarketMerchantDropdown",
+    Callback = function(Options)
+        selectedPrisonNumbers = {}
+        for _, value in ipairs(Options) do
+            table.insert(selectedPrisonNumbers, tonumber(value))
+        end
+    end,
+})
+
+local Toggle = PrisonEventTab:CreateToggle({
+    Name = "Auto Buy (Selected Slots)",
+    CurrentValue = false,
+    Flag = "BlackMarketMerchantToggle",
+    Callback = function(Value)
+          isBlackMarketEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isBlackMarketEnabled do
+                 buyPrisonItem("Black Market", selectedPrisonNumbers)
+                 wait(1)
+              end
+           end)
+        end
+    end,
+})
+
+local Section = PrisonEventTab:CreateSection("Hidden Roulette (Spin Wheel)")
+local function spinPrisonWheel(option)
+    local args = {
+        [1] = "Hidden Roulette"
+    }
+
+    if option == "3x" then
+        table.insert(args, 2, "x10")
+    elseif option == "10x" then
+        table.insert(args, 2, "x25")
+    end
+
+    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("SpinnerService"):WaitForChild("RF"):WaitForChild("Spin"):InvokeServer(unpack(args))
+end
+
+local selectedPrisonSpinOption = "10x" -- Default option
+local spinningPrison = false -- Variable to control the spinning state
+
+local Dropdown = PrisonEventTab:CreateDropdown({
+    Name = "Hidden Roulette",
+    Options = { "1x", "3x", "10x" },
+    CurrentOption = {"10x"},
+    MultipleOptions = false,
+    Flag = "WheelSpinDropdown",
+    Callback = function(Options)
+        selectedPrisonSpinOption = Options[1]
+    end,
+})
+
+local Toggle = PrisonEventTab:CreateToggle({
+    Name = "Auto Spin (Selected Amount)",
+    CurrentValue = false,
+    Flag = "WheelSpinToggle",
+    Callback = function(Value)
+        spinningPrison = Value
+        while spinningPrison do
+            spinPrisonWheel(selectedPrisonSpinOption) -- Call the spin function with the selected option
+            wait(0.1)
+        end
+    end,
+})
+
+local Section = PrisonEventTab:CreateSection("Towers Part (1)")
+ local Button = PrisonEventTab:CreateButton({
+    Name = "Police Shakedown 1x",
+    Callback = function()
+        local args = {
+            [1] = "Police Shakedown",
+            [2] = false
+        }
+       game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("TowerService"):WaitForChild("RF"):WaitForChild("EnterTower"):InvokeServer(unpack(args))
+    end,
+ })
+
+ local Button = PrisonEventTab:CreateButton({
+    Name = "Police Shakedown 250x (250x Maxed)",
+    Callback = function()
+        local args = {
+            [1] = "PoliceShakedown",
+            [2] = true
+        }
+       game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("TowerService"):WaitForChild("RF"):WaitForChild("EnterTower"):InvokeServer(unpack(args))
+    end,
+ })
+
+local Divider = PrisonEventTab:CreateDivider()
+
+local Button = PrisonEventTab:CreateButton({
+    Name = "Prison Cave 1x",
+    Callback = function()
+        local args = {
+            [1] = "PrisonCave",
+            [2] = false
+        }
+       game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("TowerService"):WaitForChild("RF"):WaitForChild("EnterTower"):InvokeServer(unpack(args))
+    end,
+ })
+
+ local Button = PrisonEventTab:CreateButton({
+    Name = "Prison Cave 250x (250x Maxed)",
+    Callback = function()
+        local args = {
+            [1] = "PrisonCave",
+            [2] = true
+        }
+       game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("TowerService"):WaitForChild("RF"):WaitForChild("EnterTower"):InvokeServer(unpack(args))
+    end,
+ })
+
+
+local Section = PrisonEventTab:CreateSection("Extra Features")
+local autoPlaytimePassClaim = false
+local Toggle = PrisonEventTab:CreateToggle({
+   Name = "Auto Claim (Playtime Pass)",
+   CurrentValue = false,
+   Flag = "AutoClaimPlaytimePassToggle", -- Unique flag for configuration saving
+   Callback = function(state)
+      autoPlaytimePassClaim = state -- Enable or disable auto-claim
+      if autoPlaytimePassClaim then
+         while autoPlaytimePassClaim do
+            for i = 1, 12 do
+               local args = {
+                  [1] = "Free", -- Keep "Free" constant
+                  [2] = i -- Loop from 1 to 12
+               }
+
+               -- Invoke the server with the current args
+               game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit")
+                   :WaitForChild("Services"):WaitForChild("EventPassService")
+                   :WaitForChild("RF"):WaitForChild("ClaimReward"):InvokeServer(unpack(args))
+
+               task.wait(0.5) -- Adjust delay as needed to prevent spamming
+               if not autoPlaytimePassClaim then
+                  break -- Stop loop immediately if toggle is turned off
+               end
+            end
+         end
+      end
+   end,
+})
+
+local autoResetPassEvent = false
+local Toggle = PrisonEventTab:CreateToggle({
+   Name = "Auto Reset Pass (Playtime Pass)",
+   CurrentValue = false,
+   Flag = "autoResetPassEventToggle", -- Unique flag for configuration saving
+   Callback = function(state)
+      autoResetPassEvent = state -- Enable or disable auto-claim
+      if autoResetPassEvent then
+         while autoResetPassEvent do
+            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("EventPassService"):WaitForChild("RF"):WaitForChild("Reset"):InvokeServer()
+               task.wait(1) -- Adjust delay as needed to prevent spamming
+               if not autoResetPassEvent then
+                 break -- Stop loop immediately if toggle is turned off
+              end
+           end
+        end
+   end,
+})
+
+local isAutoContrabandCrateEnabled = false -- A shared variable to control the loop
+local Toggle = PrisonEventTab:CreateToggle({
+    Name = "Auto Spin Contraband Crate",
+    CurrentValue = false,
+    Flag = "AutoSpinContrabandCrateToggle",
+    Callback = function(Value)
+           isAutoContrabandCrateEnabled = Value
+
+             if Value then
+                 task.spawn(function()
+                 while isAutoContrabandCrateEnabled do
+                     wait()
+                      local args = {
+                        [1] = "Contraband Crate"
+                    }
+
+                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ItemCrateService"):WaitForChild("RF"):WaitForChild("Spin"):InvokeServer(unpack(args))
+                 end
+              end)
+           end
+        end
+})
+
+
+-------------------------------------------------------------------------------------
+local Section = EventTab:CreateSection("Teleport Christmas Event")
+local Button = EventTab:CreateButton({
+    Name = "TP Event Part (1)",
+    Callback = function()
+        local args = {
+            [1] = workspace:WaitForChild("Zones"):WaitForChild("ChristmasEvent"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+ })
+
+local Button = EventTab:CreateButton({
+    Name = "TP Event Part (2)",
+    Callback = function()
+        local args = {
+            [1] = workspace:WaitForChild("Zones"):WaitForChild("SantasWorkshop"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+        }
+
+        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+ })
+
+local Button = EventTab:CreateButton({
+    Name = "TP Event Part (3)",
+    Callback = function()
+        local args = {
+            [1] = workspace:WaitForChild("Zones"):WaitForChild("Frostlands"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+        }
+
+        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+ })
+ 
+local Section = EventTab:CreateSection("Auto Beat NPCs (Part 3)")
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+-- Ensure the NPCs and HumanoidRootPart exist
+local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+if not humanoidRootPart then return end
+
+-- Function to check if the NPC has Spawned or not
+local function isNpcValid(npc)
+    local success, result = pcall(function()
+        return npc and npc:FindFirstChild("Table") and npc.Table:FindFirstChild("PlayerRoot")
+    end)
+    return success and result
+end
+
+-- Function to get all Spawned NPCs
+local function getValidNpcs()
+    local validNpcPaths = {}
+    local npcFolder = workspace.GameObjects.RngNPCs["Frostlands-Snowstorm"].Npc
+
+    for _, npc in ipairs(npcFolder:GetChildren()) do
+        if isNpcValid(npc) then
+            table.insert(validNpcPaths, npc.Table.PlayerRoot)
+        end
+    end
+
+    return validNpcPaths
+end
+
+-- Function to simulate pressing a key
+local function simulateKeyPress(key)
+    VirtualInputManager:SendKeyEvent(true, key, false, game)
+    wait(0.1) -- Short delay to simulate a key press
+    VirtualInputManager:SendKeyEvent(false, key, false, game)
+end
+
+-- Function to click the "E" key
+local function clickE()
+    simulateKeyPress(Enum.KeyCode.E) -- Simulate a single press of "E"
+end
+
+local teleportEnabled = false
+
+local function teleportToPlayerRoot()
+    while teleportEnabled do
+        local validNpcPaths = getValidNpcs()
+
+        if #validNpcPaths == 0 then break end
+
+        for _, playerRoot in ipairs(validNpcPaths) do
+            if playerRoot then
+                humanoidRootPart.CFrame = playerRoot.CFrame -- Teleport to the PlayerRoot
+                wait(0.5) -- Wait 0.5 seconds before clicking "E"
+                clickE() -- Click "E" once
+                wait(2.7) -- Wait 2.5 seconds before teleporting to the next NPC
+            end
+
+            if not teleportEnabled then break end
+        end
+    end
+end
+
+local Toggle = EventTab:CreateToggle({
+   Name = "Auto Fight NPCs - OP (Part 3)",
+   CurrentValue = false,
+   Flag = "Toggle1",
+   Callback = function(Value)
+      teleportEnabled = Value
+      if teleportEnabled then
+         teleportToPlayerRoot()
+      end
+   end,
+})
+
+local npcFolder = workspace.GameObjects.RngNPCs["Frostlands-Snowstorm"]
+local updateEnabled = false
+
+local function updateProximityPrompts(folder)
+    for _, descendant in ipairs(folder:GetDescendants()) do
+        if descendant:IsA("ProximityPrompt") then
+            descendant.HoldDuration = 0
+            descendant.Style = Enum.ProximityPromptStyle.Default
+        end
+    end
+end
+
+local function startUpdatingPrompts()
+    while updateEnabled do
+        updateProximityPrompts(npcFolder)
+        wait(1) -- Adjust the interval as needed
+    end
+end
+
+local Toggle = EventTab:CreateToggle({
+   Name = "Remove E Hold Button (Must Be ON), Faster Fight ",
+   CurrentValue = false,
+   Flag = "PromptToggle",
+   Callback = function(Value)
+      updateEnabled = Value
+      if updateEnabled then
+         startUpdatingPrompts()
+      end
+   end,
+})
+
+local Divider = EventTab:CreateDivider()
+local Paragraph = EventTab:CreateParagraph({Title = "Note !", Content = "Use The Training Glitch With It If You Wanna"})
+
+
+local Section = EventTab:CreateSection("Glitch (Train + Fight as The Same Time!) WORKS ONLY FOR PART 3!!")
+local isLooping = false  -- Flag to control the loop
+local currentNumber = 1  -- Default Frostland number
+
+-- Dropdown to enter a number for Frostland
+local Dropdown = EventTab:CreateDropdown({
+    Name = "Choose Your Biceps Weight (Part 3) For The Glitch!",
+    Options = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"},
+    CurrentOption = {"1"},
+    MultipleOptions = false,
+    Flag = "Dropdown2",
+    Callback = function(Options)
+        local number = tonumber(Options[1])  -- Get the selected number from the dropdown
+        if number and number >= 1 and number <= 12 then
+            currentNumber = number  -- Update the Frostland number based on the dropdown selection
+        end
+    end,
+})
+
+-- Toggle to start/stop the loop
+local Toggle = EventTab:CreateToggle({
+    Name = "Start Auto Train Glitch (You Can fight NPCs While You Training!)",
+    CurrentValue = false,
+    Flag = "Toggle2",
+    Callback = function(Value)
+        isLooping = Value  -- Set the loop flag based on the toggle state
+        if Value then
+            task.spawn(function()
+                while isLooping do
+                    wait()
+                    local args = {
+                        [1] = {
+                            ["Value"] = "Biceps",
+                            ["AutoType"] = "AutoTrain"
+                        }
+                    }
+
+                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("IdleTeleportService"):WaitForChild("RF"):WaitForChild("SetLatestTeleportData"):InvokeServer(unpack(args))
+
+                    local args = {
+                        [1] = "Frostlands",
+                        [2] = "Dumbells",
+                        [3] = "Frostland" .. currentNumber  -- Use the current input value
+                    }
+
+                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ToolService"):WaitForChild("RE"):WaitForChild("onEquipRequest"):FireServer(unpack(args))
+
+                    local args = {
+                        [1] = "AutoTraining",
+                        [2] = {
+                            ["TrainingType"] = "Biceps"
+                        }
+                    }
+
+                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("AutoService"):WaitForChild("RF"):WaitForChild("SetRejoin"):InvokeServer(unpack(args))
+                end
+            end)
+        end
+    end,
+})
+
+local isAutoTrainChristmasEnabled = false -- A shared variable to control the loop
+local Toggle = EventTab:CreateToggle({
+   Name = "Auto Click Train",
+   CurrentValue = false,
+   Flag = "Toggle3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+          isAutoTrainChristmasEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isAutoTrainChristmasEnabled do
+                wait(0.25)
+                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ToolService"):WaitForChild("RE"):WaitForChild("onClick"):FireServer()
+            end
+         end)
+      end
+   end,
+})
+
+local function buyItem(merchantName, selectedNumbers)
+    for _, number in ipairs(selectedNumbers) do
+        local args = {
+            [1] = merchantName,
+            [2] = number
+        }
+
+        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("LimitedMerchantService"):WaitForChild("RF"):WaitForChild("BuyItem"):InvokeServer(unpack(args))
+        wait(0.1)
+    end
+end
+
+local Section = EventTab:CreateSection("Icey Merchant")
+local selectedNumbers1 = {}
+
+local Dropdown = EventTab:CreateDropdown({
+    Name = "Icey Merchant",
+    Options = { "1", "2", "3", "4", "5" },
+    CurrentOption = {},
+    MultipleOptions = true,
+    Flag = "IceyMerchantDropdown",
+    Callback = function(Options)
+        selectedNumbers1 = {}
+        for _, value in ipairs(Options) do
+            table.insert(selectedNumbers1, tonumber(value))
+        end
+    end,
+})
+
+local isAutoIceyEnabled = false -- A shared variable to control the loop
+local Toggle = EventTab:CreateToggle({
+    Name = "Auto Buy (Selected Slots)",
+    CurrentValue = false,
+    Flag = "IceyMerchantToggle",
+    Callback = function(Value)
+          isAutoIceyEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isAutoIceyEnabled do
+                 buyItem("Icey Merchant", selectedNumbers1)
+                 wait(1)
+              end
+           end)
+        end
+    end,
+})
+
+
+local Section = EventTab:CreateSection("Jolly Merchant")
+local selectedNumbers2 = {}
+
+local Dropdown = EventTab:CreateDropdown({
+    Name = "Jolly Merchant",
+    Options = { "1", "2", "3", "4", "5" },
+    CurrentOption = {},
+    MultipleOptions = true,
+    Flag = "JollyMerchantDropdown",
+    Callback = function(Options)
+        selectedNumbers2 = {}
+        for _, value in ipairs(Options) do
+            table.insert(selectedNumbers2, tonumber(value))
+        end
+    end,
+})
+
+local isAutoJollyEnabled = false -- A shared variable to control the loop
+local Toggle = EventTab:CreateToggle({
+    Name = "Auto Buy (Selected Slots)",
+    CurrentValue = false,
+    Flag = "JollyMerchantToggle",
+    Callback = function(Value)
+          isAutoJollyEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isAutoJollyEnabled do
+                 buyItem("Jolly Merchant", selectedNumbers2)
+                 wait(1)
+              end
+           end)
+        end
+    end,
+})
+
+
+local Section = EventTab:CreateSection("Workshop Merchant")
+local selectedNumbers3 = {}
+
+local Dropdown = EventTab:CreateDropdown({
+    Name = "Workshop Merchant",
+    Options = { "1", "2", "3", "4", "5" },
+    CurrentOption = {},
+    MultipleOptions = true,
+    Flag = "WorkshopMerchantDropdown",
+    Callback = function(Options)
+        selectedNumbers3 = {}
+        for _, value in ipairs(Options) do
+            table.insert(selectedNumbers3, tonumber(value))
+        end
+    end,
+})
+
+local isAutoWorkshopEnabled = false -- A shared variable to control the loop
+local Toggle = EventTab:CreateToggle({
+    Name = "Auto Buy (Selected Slots)",
+    CurrentValue = false,
+    Flag = "WorkshopMerchantToggle",
+    Callback = function(Value)
+          isAutoWorkshopEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isAutoWorkshopEnabled do
+                  buyItem("Workshop Merchant", selectedNumbers3)
+                  wait(1)
+              end
+           end)
+        end
+    end,
+})
+
+
+local Section = EventTab:CreateSection("Icy Fortune (Spin Wheel)")
+local function spinWheel(option)
+    local args = {
+        [1] = "Icy Fortune"
+    }
+
+    if option == "3x" then
+        table.insert(args, 2, "x10")
+    elseif option == "10x" then
+        table.insert(args, 2, "x25")
+    end
+
+    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("SpinnerService"):WaitForChild("RF"):WaitForChild("Spin"):InvokeServer(unpack(args))
+end
+
+local selectedSpinOption = "10x" -- Default option
+local spinning = false -- Variable to control the spinning state
+
+local Dropdown = EventTab:CreateDropdown({
+    Name = "Icy Fortune",
+    Options = { "1x", "3x", "10x" },
+    CurrentOption = {"10x"},
+    MultipleOptions = false,
+    Flag = "WheelSpinDropdown",
+    Callback = function(Options)
+        selectedSpinOption = Options[1]
+    end,
+})
+
+local Toggle = EventTab:CreateToggle({
+    Name = "Auto Spin (Selected Amount)",
+    CurrentValue = false,
+    Flag = "WheelSpinToggle",
+    Callback = function(Value)
+        spinning = Value
+        while spinning do
+            spinWheel(selectedSpinOption) -- Call the spin function with the selected option
+            wait(0.1)
+        end
+    end,
+})
+
+local isAutoVaultEnabled = false -- A shared variable to control the loop
+local Section = EventTab:CreateSection("Extra")
+local Toggle = EventTab:CreateToggle({
+    Name = "Auto Spin Vault",
+    CurrentValue = false,
+    Flag = "Toggle4",
+    Callback = function(Value)
+           isAutoVaultEnabled = Value
+
+             if Value then
+                 task.spawn(function()
+                 while isAutoVaultEnabled do
+                     wait()
+                      local args = {
+                        [1] = "Christmas"
+                    }
+
+                    game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ItemCrateService"):WaitForChild("RF"):WaitForChild("Spin"):InvokeServer(unpack(args))
+                 end
+              end)
+           end
+        end
+})
+
+local isAutoTreeEnabled = false -- A shared variable to control the loop
+local Toggle = EventTab:CreateToggle({
+   Name = "Auto Claim Workshop Tree",
+   CurrentValue = false,
+   Flag = "Toggle5", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+          isAutoTreeEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isAutoTreeEnabled do
+                wait(2.5)
+                 local args = {
+                  [1] = "WorkshopTree"
+                }
+
+               game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("FreeGiftService"):WaitForChild("RF"):WaitForChild("Claim"):InvokeServer(unpack(args))
+            end
+         end)
+      end
+   end,
+})
+
+local isAutoSleighEnabled = false -- A shared variable to control the loop
+local Toggle = EventTab:CreateToggle({
+   Name = "Auto Claim Santa Sleigh",
+   CurrentValue = false,
+   Flag = "Toggle6", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+          isAutoSleighEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isAutoSleighEnabled do
+                wait(2.5)
+                 local args = {
+                  [1] = "SantaSleigh"
+                }
+
+               game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("FreeGiftService"):WaitForChild("RF"):WaitForChild("Claim"):InvokeServer(unpack(args))
+            end
+         end)
+      end
+   end,
+})
+
+
+-------------------------------------------------------------------------------------
+local isAutoNormalTrainEnabled = false -- A shared variable to control the loop
+local Section = TrainTab:CreateSection("Training Features")
+local Toggle = TrainTab:CreateToggle({
+    Name = "Auto Click (Fast as Can!)",
+    CurrentValue = false,
+    Flag = "Toggle7",
+   Callback = function(Value)
+          isAutoNormalTrainEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isAutoNormalTrainEnabled do
+                wait(0.1)
+                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ToolService"):WaitForChild("RE"):WaitForChild("onClick"):FireServer()
+            end
+         end)
+      end
+   end,
+})
+
+local Section = TrainTab:CreateSection("Knuckle Train")
+local selectedWorld = "1" -- Default world
+local selectedTier = "Tier1" -- Default tier
+local autoGiveStats = false -- Toggle state
+
+-- Create dropdown for selecting world
+local WorldDropdown = TrainTab:CreateDropdown({
+    Name = "Select World",
+    Options = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17" },
+    CurrentOption = {}, -- Empty by default
+    MultipleOptions = false,
+    Flag = "WorldDropdown",
+    Callback = function(Options)
+        selectedWorld = Options[1] -- Update the selected world
+    end,
+})
+
+-- Create dropdown for selecting tier
+local TierDropdown = TrainTab:CreateDropdown({
+    Name = "Select Tier/Bag",
+    Options = { "Tier1", "Tier2", "Tier3", "Tier4", "Tier5" },
+    CurrentOption = {}, -- Empty by default
+    MultipleOptions = false,
+    Flag = "TierDropdown",
+    Callback = function(Options)
+        selectedTier = Options[1] -- Update the selected tier
+    end,
+})
+
+-- Create toggle for auto giving stats
+local Toggle = TrainTab:CreateToggle({
+    Name = "Auto Knuckle",
+    CurrentValue = false,
+    Flag = "AutoKnuckleToggle",
+    Callback = function(Value)
+        autoGiveStats = Value
+        while autoGiveStats do
+            local args = {
+                [1] = selectedWorld,
+                [2] = selectedTier
+            }
+
+            game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("PunchBagService"):WaitForChild("RE"):WaitForChild("onGiveStats"):FireServer(unpack(args))
+            wait(0.2) -- Wait 0.2 seconds before repeating
+        end
+    end,
+})
+
+local Divider = TrainTab:CreateDivider()
+local Paragraph = TrainTab:CreateParagraph({Title = "Note !", Content = "You Must Be Near From The Bag To Works!"})
+
+local Section = TrainTab:CreateSection("Grip Train")
+local worldWeights = {
+    -- World 1 Grips
+    ["1Kg"] = {"1", "1Kg"},
+    ["2Kg"] = {"1", "2Kg"},
+    ["3Kg"] = {"1", "3Kg"},
+    ["4Kg"] = {"1", "4Kg"},
+    ["5Kg"] = {"1", "5Kg"},
+    ["10Kg"] = {"1", "10Kg"},
+    ["15Kg"] = {"1", "15Kg"},
+    ["20Kg"] = {"1", "20Kg"},
+    ["25Kg"] = {"1", "25Kg"},
+    ["50Kg"] = {"1", "50Kg"},
+    -- World 2 Grips
+    ["100Kg"] = {"1", "100Kg"},
+    ["250Kg"] = {"1", "250Kg"},
+    ["300Kg"] = {"2", "300Kg"},
+    ["350Kg"] = {"2", "350Kg"},
+    ["400Kg"] = {"2", "400Kg"},
+    ["450Kg"] = {"2", "450Kg"},
+    ["500Kg"] = {"2", "500Kg"},
+    ["600Kg"] = {"2", "600Kg"},
+    ["700Kg"] = {"2", "700Kg"},
+    ["800Kg"] = {"2", "800Kg"},
+    ["900Kg"] = {"2", "900Kg"},
+    ["1000Kg"] = {"2", "1000Kg"},
+    ["1250Kg"] = {"2", "1250Kg"},
+    ["1500Kg"] = {"2", "1500Kg"},
+    -- World 3 Grips
+    ["5000Kg"] = {"3", "5000Kg"},
+    ["6000Kg"] = {"3", "6000Kg"},
+    ["7500Kg"] = {"3", "7500Kg"},
+    ["10000Kg"] = {"3", "10000Kg"},
+    ["12500Kg"] = {"3", "12500Kg"},
+    ["15000Kg"] = {"3", "15000Kg"},
+    ["20000Kg"] = {"3", "20000Kg"},
+    ["25000Kg"] = {"3", "25000Kg"},
+    ["30000Kg"] = {"3", "30000Kg"},
+    ["35000Kg"] = {"3", "35000Kg"},
+    ["40000Kg"] = {"3", "40000Kg"},
+    ["45000Kg"] = {"3", "45000Kg"},
+    -- World 4 Grips
+    ["50000Kg"] = {"4", "50000Kg"},
+    ["60000Kg"] = {"4", "60000Kg"},
+    ["70000Kg"] = {"4", "70000Kg"},
+    ["80000Kg"] = {"4", "80000Kg"},
+    ["90000Kg"] = {"4", "90000Kg"},
+    ["100000Kg"] = {"4", "100000Kg"},
+    ["125000Kg"] = {"4", "125000Kg"},
+    ["150000Kg"] = {"4", "150000Kg"},
+    ["175000Kg"] = {"4", "175000Kg"},
+    ["200000Kg"] = {"4", "200000Kg"},
+    ["250000Kg"] = {"4", "250000Kg"},
+    ["300000Kg"] = {"4", "300000Kg"},
+    -- World 5 Grips
+    ["350000Kg"] = {"5", "350000Kg"},
+    ["375000Kg"] = {"5", "375000Kg"},
+    ["400000Kg"] = {"5", "400000Kg"},
+    ["425000Kg"] = {"5", "425000Kg"},
+    ["450000Kg"] = {"5", "450000Kg"},
+    ["475000Kg"] = {"5", "475000Kg"},
+    ["500000Kg"] = {"5", "500000Kg"},
+    ["525000Kg"] = {"5", "525000Kg"},
+    ["550000Kg"] = {"5", "550000Kg"},
+    ["575000Kg"] = {"5", "575000Kg"},
+    ["600000Kg"] = {"5", "600000Kg"},
+    ["625000Kg"] = {"5", "625000Kg"},
+    -- World 6 Grips
+    ["650000Kg"] = {"6", "650000Kg"},
+    ["675000Kg"] = {"6", "675000Kg"},
+    ["700000Kg"] = {"6", "700000Kg"},
+    ["725000Kg"] = {"6", "725000Kg"},
+    ["750000Kg"] = {"6", "750000Kg"},
+    ["775000Kg"] = {"6", "775000Kg"},
+    ["800000Kg"] = {"6", "800000Kg"},
+    ["825000Kg"] = {"6", "825000Kg"},
+    ["850000Kg"] = {"6", "850000Kg"},
+    ["875000Kg"] = {"6", "875000Kg"},
+    ["900000Kg"] = {"6", "900000Kg"},
+    ["925000Kg"] = {"6", "925000Kg"},
+    -- World 7 Grips
+    ["875000Kg"] = {"7", "875000Kg"},
+    ["900000Kg"] = {"7", "900000Kg"},
+    ["925000Kg"] = {"7", "925000Kg"},
+    ["950000Kg"] = {"7", "950000Kg"},
+    ["975000Kg"] = {"7", "975000Kg"},
+    ["1000000Kg"] = {"7", "1000000Kg"},
+    ["1025000Kg"] = {"7", "1025000Kg"},
+    ["1050000Kg"] = {"7", "1050000Kg"},
+    ["1075000Kg"] = {"7", "1075000Kg"},
+    ["1100000Kg"] = {"7", "1100000Kg"},
+    ["1125000Kg"] = {"7", "1125000Kg"},
+    ["1150000Kg"] = {"7", "1150000Kg"},
+    -- World 8 Grips
+    ["875000Kg1"] = {"8", "875000Kg"},
+    ["900000Kg2"] = {"8", "900000Kg"},
+    ["925000Kg3"] = {"8", "925000Kg"},
+    ["950000Kg4"] = {"8", "950000Kg"},
+    ["975000Kg5"] = {"8", "975000Kg"},
+    ["1000000Kg6"] = {"8", "1000000Kg"},
+    ["1025000Kg7"] = {"8", "1025000Kg"},
+    ["1050000Kg8"] = {"8", "1050000Kg"},
+    ["1075000Kg9"] = {"8", "1075000Kg"},
+    ["1100000Kg10"] = {"8", "1100000Kg"},
+    ["1125000Kg11"] = {"8", "1125000Kg"},
+    ["1150000Kg12"] = {"8", "1150000Kg"},
+    -- World 9 Grips
+    ["875000Kg13"] = {"9", "875000Kg"},
+    ["900000Kg14"] = {"9", "900000Kg"},
+    ["925000Kg15"] = {"9", "925000Kg"},
+    ["950000Kg16"] = {"9", "950000Kg"},
+    ["975000Kg17"] = {"9", "975000Kg"},
+    ["1000000Kg18"] = {"9", "1000000Kg"},
+    ["1025000Kg19"] = {"9", "1025000Kg"},
+    ["1050000Kg20"] = {"9", "1050000Kg"},
+    ["1075000Kg21"] = {"9", "1075000Kg"},
+    ["1100000Kg22"] = {"9", "1100000Kg"},
+    ["1125000Kg23"] = {"9", "1125000Kg"},
+    ["1150000Kg24"] = {"9", "1150000Kg"},
+    -- World 10 Grips
+    ["875000Kg26"] = {"10", "875000Kg"},
+    ["900000Kg27"] = {"10", "900000Kg"},
+    ["925000Kg28"] = {"10", "925000Kg"},
+    ["950000Kg29"] = {"10", "950000Kg"},
+    ["975000Kg30"] = {"10", "975000Kg"},
+    ["1000000Kg31"] = {"10", "1000000Kg"},
+    ["1025000Kg32"] = {"10", "1025000Kg"},
+    ["1050000Kg33"] = {"10", "1050000Kg"},
+    ["1075000Kg34"] = {"10", "1075000Kg"},
+    ["1100000Kg35"] = {"10", "1100000Kg"},
+    ["1125000Kg36"] = {"10", "1125000Kg"},
+    ["1150000Kg37"] = {"10", "1150000Kg"},
+    -- World 11 Grips
+    ["Ice1"] = {"11", "Ice1"},
+    ["Ice2"] = {"11", "Ice2"},
+    ["Ice3"] = {"11", "Ice3"},
+    ["Ice4"] = {"11", "Ice4"},
+    ["Ice5"] = {"11", "Ice5"},
+    ["Ice6"] = {"11", "Ice6"},
+    ["Ice7"] = {"11", "Ice7"},
+    ["Ice8"] = {"11", "Ice8"},
+    ["Ice9"] = {"11", "Ice9"},
+    ["Ice10"] = {"11", "Ice10"},
+    ["Ice11"] = {"11", "Ice11"},
+    ["Ice12"] = {"11", "Ice12"},
+    -- World 12 Grips
+    ["Mining1"] = {"12", "Mining1"},
+    ["Mining2"] = {"12", "Mining2"},
+    ["Mining3"] = {"12", "Mining3"},
+    ["Mining4"] = {"12", "Mining4"},
+    ["Mining5"] = {"12", "Mining5"},
+    ["Mining6"] = {"12", "Mining6"},
+    ["Mining7"] = {"12", "Mining7"},
+    ["Mining8"] = {"12", "Mining8"},
+    ["Mining9"] = {"12", "Mining9"},
+    ["Mining10"] = {"12", "Mining10"},
+    ["Mining11"] = {"12", "Mining11"},
+    ["Mining12"] = {"12", "Mining12"},
+    -- World 13 Grips
+    ["Kingdom1"] = {"13", "Kingdom1"},
+    ["Kingdom2"] = {"13", "Kingdom2"},
+    ["Kingdom3"] = {"13", "Kingdom3"},
+    ["Kingdom4"] = {"13", "Kingdom4"},
+    ["Kingdom5"] = {"13", "Kingdom5"},
+    ["Kingdom6"] = {"13", "Kingdom6"},
+    ["Kingdom7"] = {"13", "Kingdom7"},
+    ["Kingdom8"] = {"13", "Kingdom8"},
+    ["Kingdom9"] = {"13", "Kingdom9"},
+    ["Kingdom10"] = {"13", "Kingdom10"},
+    ["Kingdom11"] = {"13", "Kingdom11"},
+    ["Kingdom12"] = {"13", "Kingdom12"},
+    -- World 14 Grips
+    ["Paradise1"] = {"14", "Paradise1"},
+    ["Paradise2"] = {"14", "Paradise2"},
+    ["Paradise3"] = {"14", "Paradise3"},
+    ["Paradise4"] = {"14", "Paradise4"},
+    ["Paradise5"] = {"14", "Paradise5"},
+    ["Paradise6"] = {"14", "Paradise6"},
+    ["Paradise7"] = {"14", "Paradise7"},
+    ["Paradise8"] = {"14", "Paradise8"},
+    ["Paradise9"] = {"14", "Paradise9"},
+    ["Paradise10"] = {"14", "Paradise10"},
+    ["Paradise11"] = {"14", "Paradise11"},
+    ["Paradise12"] = {"14", "Paradise12"},
+    -- World 15 Grips
+    ["Rift1"] = {"15", "Heaven1"},
+    ["Rift2"] = {"15", "Heaven2"},
+    ["Rift3"] = {"15", "Heaven3"},
+    ["Rift4"] = {"15", "Heaven4"},
+    ["Rift5"] = {"15", "Heaven5"},
+    ["Rift6"] = {"15", "Heaven6"},
+    ["Rift7"] = {"15", "Heaven7"},
+    ["Rift8"] = {"15", "Heaven8"},
+    ["Rift9"] = {"15", "Heaven9"},
+    ["Rift10"] = {"15", "Heaven10"},
+    ["Rift11"] = {"15", "Heaven11"},
+    ["Rift12"] = {"15", "Heaven12"},
+    -- World 16 Grips
+    ["Heaven1"] = {"16", "Heaven1"},
+    ["Heaven2"] = {"16", "Heaven2"},
+    ["Heaven3"] = {"16", "Heaven3"},
+    ["Heaven4"] = {"16", "Heaven4"},
+    ["Heaven5"] = {"16", "Heaven5"},
+    ["Heaven6"] = {"16", "Heaven6"},
+    ["Heaven7"] = {"16", "Heaven7"},
+    ["Heaven8"] = {"16", "Heaven8"},
+    ["Heaven9"] = {"16", "Heaven9"},
+    ["Heaven10"] = {"16", "Heaven10"},
+    ["Heaven11"] = {"16", "Heaven11"},
+    ["Heaven12"] = {"16", "Heaven12"},
+    -- World 17 Grips
+    ["Matrix1"] = {"17", "Matrix1"},
+    ["Matrix2"] = {"17", "Matrix2"},
+    ["Matrix3"] = {"17", "Matrix3"},
+    ["Matrix4"] = {"17", "Matrix4"},
+    ["Matrix5"] = {"17", "Matrix5"},
+    ["Matrix6"] = {"17", "Matrix6"},
+    ["Matrix7"] = {"17", "Matrix7"},
+    ["Matrix8"] = {"17", "Matrix8"},
+    ["Matrix9"] = {"17", "Matrix9"},
+    ["Matrix10"] = {"17", "Matrix10"},
+    ["Matrix11"] = {"17", "Matrix11"},
+    ["Matrix12"] = {"17", "Matrix12"},
+}
+
+-- Default args setup
+local args = {
+    [1] = "1", -- Default world
+    [2] = "Grips", -- Always Grips
+    [3] = "100Kg" -- Default weight
+}
+
+local Dropdown = TrainTab:CreateDropdown({
+   Name = "Select Weight (Each World Has 12 Grips)",
+   Options = {
+       -- World 1 options
+       "1Kg (World 1)", "2Kg (World 1)", "3Kg (World 1)", "4Kg (World 1)", "5Kg (World 1)", 
+       "10Kg (World 1)", "15Kg (World 1)", "20Kg (World 1)", "25Kg (World 1)", "50Kg (World 1)", 
+       "100Kg (World 1)", "250Kg (World 1)", 
+       -- World 2 options
+       "300Kg (World 2)", "350Kg (World 2)", "400Kg (World 2)", 
+       "450Kg (World 2)", "500Kg (World 2)", "600Kg (World 2)", "700Kg (World 2)", "800Kg (World 2)", 
+       "900Kg (World 2)", "1000Kg (World 2)", "1250Kg (World 2)", "1500Kg (World 2)",
+       -- World 3 options
+       "5000Kg (World 3)", "6000Kg (World 3)", "7500Kg (World 3)", "10000Kg (World 3)", 
+       "12500Kg (World 3)", "15000Kg (World 3)", "20000Kg (World 3)", "25000Kg (World 3)", 
+       "30000Kg (World 3)", "35000Kg (World 3)", "40000Kg (World 3)", "45000Kg (World 3)",
+       -- World 4 options
+       "50000Kg (World 4)", "60000Kg (World 4)", "70000Kg (World 4)", "80000Kg (World 4)", 
+       "90000Kg (World 4)", "100000Kg (World 4)", "125000Kg (World 4)", "150000Kg (World 4)", 
+       "175000Kg (World 4)", "200000Kg (World 4)", "250000Kg (World 4)", "300000Kg (World 4)",
+       "350000Kg (World 5)", "375000Kg (World 5)", "400000Kg (World 5)", "425000Kg (World 5)",
+       -- World 5 options
+       "350000Kg (World 5)", "375000Kg (World 5)", "400000Kg (World 5)", "425000Kg (World 5)",
+       "450000Kg (World 5)", "475000Kg (World 5)", "500000Kg (World 5)", "525000Kg (World 5)",
+       "550000Kg (World 5)", "575000Kg (World 5)", "600000Kg (World 5)", "625000Kg (World 5)",
+       -- World 6 options
+        "650000Kg (World 6)", "675000Kg (World 6)", "700000Kg (World 6)", "725000Kg (World 6)",
+        "750000Kg (World 6)", "775000Kg (World 6)", "800000Kg (World 6)", "825000Kg (World 6)",
+        "850000Kg (World 6)", "875000Kg (World 6)", "900000Kg (World 6)", "925000Kg (World 6)",
+        -- World 7 options
+        "875000Kg (World 7)", "900000Kg (World 7)", "925000Kg (World 7)", "950000Kg (World 7)",
+        "975000Kg (World 7)", "1000000Kg (World 7)", "1025000Kg (World 7)", "1050000Kg (World 7)",
+        "1075000Kg (World 7)", "1100000Kg (World 7)", "1125000Kg (World 7)", "1150000Kg (World 7)",
+        -- World 8 options
+        "875000Kg1 (World 8)", "900000Kg2 (World 8)", "925000Kg3 (World 8)", "950000Kg4 (World 8)",
+        "975000Kg5 (World 8)", "1000000Kg6 (World 8)", "1025000Kg7 (World 8)", "1050000Kg8 (World 8)",
+        "1075000Kg9 (World 8)", "1100000Kg10 (World 8)", "1125000Kg11 (World 8)", "1150000Kg12 (World 8)",
+        -- World 9 options
+        "875000Kg13 (World 9)", "900000Kg14 (World 9)", "925000Kg15 (World 9)", "950000Kg16 (World 9)",
+        "975000Kg17 (World 9)", "1000000Kg18 (World 9)", "1025000Kg19 (World 9)", "1050000Kg20 (World 9)",
+        "1075000Kg21 (World 9)", "1100000Kg22 (World 9)", "1125000Kg23 (World 9)", "1150000Kg24 (World 9)",
+        -- World 10 options
+        "875000Kg26 (World 10)", "900000Kg27 (World 10)", "925000Kg28 (World 10)", "950000Kg29 (World 10)",
+        "975000Kg30 (World 10)", "1000000Kg31 (World 10)", "1025000Kg32 (World 10)", "1050000Kg33 (World 10)",
+        "1075000Kg34 (World 10)", "1100000Kg35 (World 10)", "1125000Kg36 (World 10)", "1150000Kg37 (World 10)",
+
+        -- World 11 options
+        "Ice1 (World 11)", "Ice2 (World 11)", "Ice3 (World 11)", "Ice4 (World 11)",
+        "Ice5 (World 11)", "Ice6 (World 11)", "Ice7 (World 11)", "Ice8 (World 11)",
+        "Ice9 (World 11)", "Ice10 (World 11)", "Ice11 (World 11)", "Ice12 (World 11)",
+        -- World 12 options
+        "Mining1 (World 12)", "Mining2Kg (World 12)", "Mining3 (World 12)", "Mining4 (World 12)",
+        "Mining5 (World 12)", "Mining6Kg (World 12)", "Mining7 (World 12)", "Mining8 (World 12)",
+        "Mining9 (World 12)", "Mining10Kg (World 12)", "Mining11 (World 12)", "Mining12 (World 12)",
+        -- World 13 options
+        "Kingdom1 (World 13)", "Kingdom2 (World 13)", "Kingdom3 (World 13)", "Kingdom4 (World 13)",
+        "Kingdom5 (World 13)", "Kingdom6 (World 13)", "Kingdom7 (World 13)", "Kingdom8 (World 13)",
+        "Kingdom9 (World 13)", "Kingdom10 (World 13)", "Kingdom11 (World 13)", "Kingdom12 (World 13)",
+        -- World 14 options
+        "Paradise1 (World 14)", "Paradise2 (World 14)", "Paradise3 (World 14)", "Paradise4 (World 14)",
+        "Paradise5 (World 14)", "Paradise6 (World 14)", "Paradise7 (World 14)", "Paradise8 (World 14)",
+        "Paradise9 (World 14)", "Paradise10 (World 14)", "Paradise11 (World 14)", "Paradise12 (World 14)",
+        -- World 15 options
+        "Heaven1 (World 15)", "Heaven2 (World 15)", "Heaven3 (World 15)", "Heaven4 (World 15)",
+        "Heaven5 (World 15)", "Heaven6 (World 15)", "Heaven7 (World 15)", "Heaven8 (World 15)",
+        "Heaven9 (World 15)", "Heaven10 (World 15)", "Heaven11 (World 15)", "Heaven12 (World 15)",
+        -- World 16 options
+        "Rift1 (World 16)", "Rift2 (World )16", "Rift3 (World 16)", "Rift4 (World 16)",
+        "Rift5 (World 16)", "Rift6 (World 16)", "Rift7 (World 16)", "Rift8 (World 16)",
+        "Rift9 (World 16)", "Rift10 (World 16)", "Rift11 (World 16)", "Rift12 (World 16)",
+        -- World 17 options
+        "Matrix1 (World 17)", "Matrix2 (World 17)", "Matrix3 (World 17)", "Matrix4 (World 17)",
+        "Matrix5 (World 17)", "Matrix6 (World 17)", "Matrix7 (World 17)", "Matrix8 (World 17)",
+        "Matrix9 (World 17)", "Matrix10 (World 17)", "Matrix11 (World 17)", "Matrix12 (World 17)"
+   },
+   sCurrentOption = {"100Kg (World 1)"},
+   MultipleOptions = false,
+   Flag = "GripTrainNVDropdown",
+   Callback = function(Options)
+      local selectedWeight = Options[1]:match("^(%S+)")  -- Extract weight value like "1Kg"
+      
+      -- Update the world and weight based on the selection
+      args[1], args[3] = unpack(worldWeights[selectedWeight])
+      
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ToolService"):WaitForChild("RE"):WaitForChild("onGuiEquipRequest"):FireServer(unpack(args))
+   end,
+})
+
+
+-------------------------------------------------------------------------------------
+local isAutoClickFightEnabled = false -- A shared variable to control the loop
+local Section = NpcTab:CreateSection("NPCs/Bosses Features")
+local Toggle = NpcTab:CreateToggle({
+    Name = "Auto Click Fight NPCs/Bosses",
+    CurrentValue = false,
+    Flag = "Toggle8",
+   Callback = function(Value)
+          isAutoClickFightEnabled = Value -- Update the shared variable based on the toggle state
+
+            if Value then 
+             task.spawn(function()
+            while isAutoClickFightEnabled do
+                wait(0.1)
+                game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ArmWrestleService"):WaitForChild("RE"):WaitForChild("onClickRequest"):FireServer()
+            end
+         end)
+      end
+   end,
+})
+
+local selectedOption = nil -- To store the selected dropdown option
+local toggleEnabled = false -- To track the toggle state
+
+-- List of NPCs for all Worlds
+local allNPCs = {
+    -- World 1 NPCs
+    "Bully", "Teacher", "GymRat", "MafiaBoss", "Champion",
+
+    -- World 2 NPCs
+    "ScrapTrader", "CyberCop", "CyberAssassin", "RipperDoc", "RogueAi",
+
+    -- World 3 NPCs
+    "CocoNut", "FatPirate", "MermaidKing", "FriendlyShark", "Kraken",
+
+    -- World 4 NPCs
+    "Barbarian", "Hazmat", "Enforcer", "Bulk", "MutantKing",
+
+    -- World 5 NPCs
+    "Primal", "Dion", "Archeologist", "TribeLeader", "Mammoth",
+
+    -- World 6 NPCs
+    "Orinthian", "Spaceboy", "DemonSlayer", "CyberCat", "Udzal",
+
+    -- World 7 NPCs
+    "RocketRider", "MissileMaven", "LairGuardian", "NovaNomad", "SpaceDog",
+
+    -- World 8 NPCs
+    "Noob", "Trainer", "Rogue", "Master", "UndeadSparta",
+
+    -- World 9 NPCs
+    "DeskAgent", "FieryGuide", "DarkBanker", "MagmaTroll", "EvilOverseer",
+
+    -- World 10 NPCs
+    "Sorcerer", "CyclopsChris", "Leviathan", "FungiCrusher", "TheBrute",
+
+    -- World 11 NPCs
+    "SnowOps", "MountainSkier", "Frostington", "Frostfang", "Glaciator",
+
+    -- World 12 NPCs
+    "EvilRuby", "CashBandit", "MinerMike", "CaveClint", "MrLizard",
+
+    -- World 13 NPCs
+    "GuardianKnight", "PrincessPhoebe", "Goblin", "KingKieran", "ShinyKinght",
+
+    -- World 14 NPCs
+    "RookieOrc", "HunterOrc", "DemonOrc", "ElderOrc", "WealthyOrc",
+
+    -- World 15 NPCs
+    "EvilMinion", "PureMinion", "AngelicWarrior", "DarkBrute", "Empyrean",
+
+    -- World 16 NPCs
+    "GhostBlade", "WhiteMage", "RustGolem", "LightEmber", "LightBringer",
+
+    -- World 17 NPCs
+    "MaskedHacker", "GlitchedHacker", "HackedTV", "MatrixDefender", "CorruptGuest"
+}
+
+-- Function to get the world number for the selected NPC
+local function getWorldNumber(npcName)
+    if table.find({"Bully", "Teacher", "GymRat", "MafiaBoss", "Champion"}, npcName) then
+        return "1"
+    elseif table.find({"ScrapTrader", "CyberCop", "CyberAssassin", "RipperDoc", "RogueAi"}, npcName) then
+        return "2"
+    elseif table.find({"CocoNut", "FatPirate", "MermaidKing", "FriendlyShark", "Kraken"}, npcName) then
+        return "3"
+    elseif table.find({"Barbarian", "Hazmat", "Enforcer", "Bulk", "MutantKing"}, npcName) then
+        return "4"
+    elseif table.find({"Primal", "Dion", "Archeologist", "TribeLeader", "Mammoth"}, npcName) then
+        return "5"
+    elseif table.find({"Orinthian", "Spaceboy", "DemonSlayer", "CyberCat", "Udzal"}, npcName) then
+        return "6"
+    elseif table.find({"RocketRider", "MissileMaven", "LairGuardian", "NovaNomad", "SpaceDog"}, npcName) then
+        return "7"
+    elseif table.find({"Noob", "Trainer", "Rogue", "Master", "UndeadSparta"}, npcName) then
+        return "8"
+    elseif table.find({"DeskAgent", "FieryGuide", "DarkBanker", "MagmaTroll", "EvilOverseer"}, npcName) then
+        return "9"
+    elseif table.find({"Sorcerer", "CyclopsChris", "Leviathan", "FungiCrusher", "TheBrute"}, npcName) then
+        return "10"
+    elseif table.find({"SnowOps", "MountainSkier", "Frostington", "Frostfang", "Glaciator"}, npcName) then
+        return "11"
+    elseif table.find({"EvilRuby", "CashBandit", "MinerMike", "CaveClint", "MrLizard"}, npcName) then
+        return "12"
+    elseif table.find({"GuardianKnight", "PrincessPhoebe", "Goblin", "KingKieran", "ShinyKinght"}, npcName) then
+        return "13"
+    elseif table.find({"RookieOrc", "HunterOrc", "DemonOrc", "ElderOrc", "WealthyOrc"}, npcName) then
+        return "14"
+    elseif table.find({"EvilMinion", "PureMinion", "AngelicWarrior", "DarkBrute", "Empyrean"}, npcName) then
+        return "15"
+    elseif table.find({"GhostBlade", "WhiteMage", "RustGolem", "LightEmber", "LightBringer"}, npcName) then
+        return "16"
+    elseif table.find({"MaskedHacker", "GlitchedHacker", "HackedTV", "MatrixDefender", "CorruptGuest"}, npcName) then
+        return "17"  
+    end
+    return nil
+end
+
+-- Create a dropdown menu with NPC options
+local Dropdown = NpcTab:CreateDropdown({
+   Name = "Select an NPC",
+   Options = allNPCs, -- Default options list
+   CurrentOption = {"CorruptGuest"}, -- Default selected option
+   MultipleOptions = false, -- Allow only one option to be selected
+   Flag = "Dropdown3",
+   Callback = function(Options)
+       selectedOption = Options[1] -- Save the selected option
+   end,
+})
+
+-- Create a toggle
+local Toggle = NpcTab:CreateToggle({
+   Name = "Enable Auto Fight NPCs/Bosses",
+   CurrentValue = false,
+   Flag = "Toggle9",
+   Callback = function(Value)
+       toggleEnabled = Value 
+       if toggleEnabled then
+           spawn(function() 
+               while toggleEnabled and selectedOption do
+                   local worldNumber = getWorldNumber(selectedOption) -- Get the world number based on selected NPC
+                   if worldNumber then
+                       local args = {
+                           [1] = selectedOption, -- NPC name
+                           [2] = workspace:WaitForChild("GameObjects"):WaitForChild("ArmWrestling"):WaitForChild(worldNumber):WaitForChild("NPC"):WaitForChild(selectedOption):WaitForChild("Table"), -- NPC path
+                           [3] = worldNumber -- World number
+                       }
+
+                       game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ArmWrestleService"):WaitForChild("RE"):WaitForChild("onEnterNPCTable"):FireServer(unpack(args))
+
+                       wait(0.01)
+                   end
+               end
+           end)
+       end
+   end,
+})
+
+
+-------------------------------------------------------------------------------------
+local Section = EggTab:CreateSection("Main Eggs")
+local Paragraph = EggTab:CreateParagraph({Title = "Read !", Content = "Not Out Yet!"})
+
+local Section = EggTab:CreateSection("Event Egg")
+local hatchEventEgg = false
+
+local function hatchingEventEgg()
+    while hatchEventEgg do
+        local args = {
+           [1] = 30,
+          }
+
+          game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("EventService"):WaitForChild("RF"):WaitForChild("ClaimEgg"):InvokeServer(unpack(args))
+        wait(0.01) -- Adjust the wait time as needed
+    end
+end
+
+local toggle = EggTab:CreateToggle({
+    Name = "Auto Hatch Event Egg (Pirate) OP!",
+    CurrentValue = false,
+    Flag = "EggEvent1Toggle",
+    Callback = function(Value)
+        hatchEventEgg = Value
+        if hatchEventEgg then
+            hatchingEventEgg()
+        end
+    end,
+})
+
+local Divider = EggTab:CreateDivider()
+local Paragraph = EggTab:CreateParagraph({Title = "Its Hatching 30x For FREE!", Content = "Ez"})
+
+
+-------------------------------------------------------------------------------------
+local Section = TeleportTab:CreateSection("Teleport Main Worlds")
+local Button = TeleportTab:CreateButton({
+    Name = "Garden",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("Garden"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Spawn | World 1",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("1"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Space Gym | World 2",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("2"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Beach | World 3",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("3"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Bunker | World 4",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("4"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Dino | World 5",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("5"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Void | World 6",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("6"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Space Center | World 7",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("7"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Roman Empire | World 8",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("8"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Underworld | World 9",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("9"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Magic Forest | World 10",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("10"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Snowy Peaks | World 11",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("11"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Dusty Tavern | World 12",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("12"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Lost Kingdom | World 13",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("13"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Orc Paradise | World 14",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("14"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Heavenly Island | World 15",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("15"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "The Rift | World 16",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("16"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+local Button = TeleportTab:CreateButton({
+    Name = "Matrix | World 17",
+    Callback = function()
+      local args = {
+          [1] = workspace:WaitForChild("Zones"):WaitForChild("17"):WaitForChild("Interactables"):WaitForChild("Teleports"):WaitForChild("Locations"):WaitForChild("Spawn")
+      }
+
+      game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("ZoneService"):WaitForChild("RE"):WaitForChild("teleport"):FireServer(unpack(args))
+    end,
+})
+
+
+-------------------------------------------------------------------------------------
+local isAutoRollEnabled = false -- A shared variable to control the loop
+local Section = ExtraTab:CreateSection("Extra Features")
+local Toggle = ExtraTab:CreateToggle({
+    Name = "Auto Roll Aura",
+    CurrentValue = false,
+    Flag = "Toggle10",
+    Callback = function(Value)
+           isAutoRollEnabled = Value
+
+           if Value then
+               task.spawn(function()
+               while isAutoRollEnabled do
+                   wait(0.001)
+                   game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("AuraService"):WaitForChild("RF"):WaitForChild("Roll"):InvokeServer()
+                end
+             end)
+          end
+       end,
+})
+
+local Button = ExtraTab:CreateButton({
+    Name = "Anti AFK",
+    Callback = function()
+      loadstring(game:HttpGet("https://raw.githubusercontent.com/batusz/main/roblox/__Anti__Afk__Script__", true))()
+  end,
+})
+
