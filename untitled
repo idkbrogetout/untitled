@@ -135,13 +135,7 @@ local Toggle = PrisonEventTab:CreateToggle({
    Callback = function(Value)
       teleportPrisonEnabled = Value
       if teleportPrisonEnabled then
-         teleportPrisonToPlayerRoot()
-             Rayfield:Notify({
-            Title = "Read !",
-            Content = "Make sure you are in a server that have inf snowstorm event , bc when the snowstorm event end, it Will broke..",
-            Duration = 5,  -- Notification will last for 5 seconds
-            Image = 4483362458,  -- Optional image ID for the notification
-         })    
+         teleportPrisonToPlayerRoot() 
       end
    end,
 })
@@ -176,9 +170,6 @@ local Toggle = PrisonEventTab:CreateToggle({
       end
    end,
 })
-
-local Divider = PrisonEventTab:CreateDivider()
-local Paragraph = PrisonEventTab:CreateParagraph({Title = "READ!", Content = "Make sure you are in a server that have ( inf Snowstorm Event ) , bc when the Snowstorm Event end, it Will broke.."})
 
 local Section = PrisonEventTab:CreateSection("Glitch (Train + Fight as The Same Time!) (Part 1)")
 local isGlitchLooping = false  -- Flag to control the loop
